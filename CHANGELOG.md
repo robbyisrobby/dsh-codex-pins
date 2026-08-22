@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.2
+
+- Drop the pin icon beside the Pinned heading so it lines up with Recents.
+
 ## 1.1.1
 
 - Pin accent color is Harness blue (`#3884ff`) instead of amber.

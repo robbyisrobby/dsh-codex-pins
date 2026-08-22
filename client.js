@@ -198,7 +198,7 @@ window.__ModuleLoader__.load({
       '.dsh-codex-pins-divider{flex:none;height:1px;margin:4px 8px 2px;background:var(--dsw-alias-divider,rgba(140,149,159,.18));}',
       '[' + SECTION_ATTR + ']{flex:none;user-select:none;}',
       '.dsh-codex-pins-heading{display:flex;align-items:center;gap:8px;height:28px;padding:0 8px;color:var(--dsw-alias-label-secondary,#8b949e);font-size:12px;font-weight:600;letter-spacing:.02em;flex:none;}',
-      '.dsh-codex-pins-heading svg{flex:none;color:#3884ff;opacity:1;}',
+      '.dsh-codex-pins-heading svg{display:none;}',
       '.dsh-codex-pins-empty{padding:6px 8px 10px;color:var(--dsw-alias-label-tertiary,#8b949e);font-size:12px;}',
       '.dsh-codex-pins-list{display:flex;flex-direction:column;gap:1px;}',
       '.dsh-codex-pins-row{all:unset;box-sizing:border-box;display:flex;align-items:center;gap:8px;width:100%;height:34px;padding:0 8px;border-radius:8px;color:var(--dsw-alias-label-primary,#e6edf3);cursor:pointer;font-size:13px;}',
@@ -283,10 +283,9 @@ window.__ModuleLoader__.load({
       }
     }
 
-    function headingEl(label, withIcon) {
+    function headingEl(label) {
       var heading = document.createElement('div')
       heading.className = 'dsh-codex-pins-heading'
-      if (withIcon) heading.innerHTML = PIN_SVG
       var text = document.createElement('span')
       text.textContent = label
       heading.appendChild(text)
@@ -310,6 +309,11 @@ window.__ModuleLoader__.load({
       }
       var existing = treeBody.closest('[' + SPLIT_ATTR + ']')
       if (existing) {
+        var pinHeadingRoot = existing.querySelector('[data-pane="pinned"] .dsh-codex-pins-heading')
+        if (pinHeadingRoot) {
+          var icons = pinHeadingRoot.querySelectorAll('svg')
+          for (var i = 0; i < icons.length; i++) icons[i].remove()
+        }
         return {
           split: existing,
           pinList: existing.querySelector('.dsh-codex-pins-list'),
@@ -326,7 +330,7 @@ window.__ModuleLoader__.load({
       var pinPane = document.createElement('div')
       pinPane.className = 'dsh-codex-pins-pane'
       pinPane.setAttribute('data-pane', 'pinned')
-      var pinHead = headingEl('', true)
+      var pinHead = headingEl('')
       var pinBody = document.createElement('div')
       pinBody.className = 'dsh-codex-pins-pane-body'
       var pinSection = document.createElement('div')
