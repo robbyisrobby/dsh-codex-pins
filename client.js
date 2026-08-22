@@ -198,7 +198,7 @@ window.__ModuleLoader__.load({
       '.dsh-codex-pins-divider{flex:none;height:1px;margin:4px 8px 2px;background:var(--dsw-alias-divider,rgba(140,149,159,.18));}',
       '[' + SECTION_ATTR + ']{flex:none;user-select:none;}',
       '.dsh-codex-pins-heading{display:flex;align-items:center;gap:8px;height:28px;padding:0 8px;color:var(--dsw-alias-label-secondary,#8b949e);font-size:12px;font-weight:600;letter-spacing:.02em;flex:none;}',
-      '.dsh-codex-pins-heading svg{flex:none;opacity:.85;}',
+      '.dsh-codex-pins-heading svg{flex:none;color:#3884ff;opacity:1;}',
       '.dsh-codex-pins-empty{padding:6px 8px 10px;color:var(--dsw-alias-label-tertiary,#8b949e);font-size:12px;}',
       '.dsh-codex-pins-list{display:flex;flex-direction:column;gap:1px;}',
       '.dsh-codex-pins-row{all:unset;box-sizing:border-box;display:flex;align-items:center;gap:8px;width:100%;height:34px;padding:0 8px;border-radius:8px;color:var(--dsw-alias-label-primary,#e6edf3);cursor:pointer;font-size:13px;}',
@@ -206,11 +206,11 @@ window.__ModuleLoader__.load({
       '.dsh-codex-pins-row[aria-current="true"]{background:color-mix(in srgb, var(--dsw-alias-label-primary,#e6edf3) 12%, transparent);}',
       '.dsh-codex-pins-title{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}',
       '.dsh-codex-pins-time{flex:none;color:var(--dsw-alias-label-secondary,#8b949e);font-size:11px;}',
-      '.dsh-codex-pins-toggle{all:unset;display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:4px;color:#eab308;cursor:pointer;flex:none;}',
-      '.dsh-codex-pins-toggle:hover{background:rgba(234,179,8,.14);}',
+      '.dsh-codex-pins-toggle{all:unset;display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:4px;color:#3884ff;cursor:pointer;flex:none;}',
+      '.dsh-codex-pins-toggle:hover{background:rgba(56,132,255,.14);}',
       'button.' + ROW_BTN_CLASS + '{all:unset;display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;margin-right:4px;border-radius:4px;color:#8b949e;cursor:pointer;flex:none;opacity:0;}',
       '[role="treeitem"]:hover > button.' + ROW_BTN_CLASS + ',button.' + ROW_BTN_CLASS + '.is-pinned,button.' + ROW_BTN_CLASS + ':focus-visible{opacity:1;}',
-      'button.' + ROW_BTN_CLASS + '.is-pinned{color:#eab308;}',
+      'button.' + ROW_BTN_CLASS + '.is-pinned{color:#3884ff;}',
       'button.' + ROW_BTN_CLASS + ':hover{background:rgba(140,149,159,.12);}',
     ].join('')
 

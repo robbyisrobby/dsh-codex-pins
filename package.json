@@ -1,6 +1,6 @@
 {
   "name": "dsh-codex-pins",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Codex-style pinned sessions for DeepSeek Harness — a Pinned pane and a Recents pane, independently scrollable.",
   "keywords": [
     "deepseek-harness",
