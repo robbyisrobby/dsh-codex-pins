@@ -25,6 +25,10 @@ test('decodeStoredPins reads arrays and dsh-session-pin envelopes', () => {
     ['session-bbbbbb'],
   )
   assert.deepEqual(decodeStoredPins(null), [])
+  assert.deepEqual(
+    decodeStoredPins({ v: 1, pinned: ['session-cccccc'] }),
+    ['session-cccccc'],
+  )
 })
 
 test('setPinned inserts newest-first and unpins', () => {
