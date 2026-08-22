@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.3
+
+- Put the session-row pin to the left of the ··· menu, including running sessions.
+
 ## 1.1.2
 
 - Drop the pin icon beside the Pinned heading so it lines up with Recents.

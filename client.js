@@ -208,10 +208,9 @@ window.__ModuleLoader__.load({
       '.dsh-codex-pins-time{flex:none;color:var(--dsw-alias-label-secondary,#8b949e);font-size:11px;}',
       '.dsh-codex-pins-toggle{all:unset;display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:4px;color:#3884ff;cursor:pointer;flex:none;}',
       '.dsh-codex-pins-toggle:hover{background:rgba(56,132,255,.14);}',
-      'button.' + ROW_BTN_CLASS + '{all:unset;display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;margin-right:4px;border-radius:4px;color:#8b949e;cursor:pointer;flex:none;opacity:0;}',
-      '[role="treeitem"]:hover > button.' + ROW_BTN_CLASS + ',button.' + ROW_BTN_CLASS + '.is-pinned,button.' + ROW_BTN_CLASS + ':focus-visible{opacity:1;}',
+      'button.' + ROW_BTN_CLASS + '{all:unset;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:4px;color:var(--dsw-alias-label-secondary,#8b949e);cursor:pointer;flex:none;}',
       'button.' + ROW_BTN_CLASS + '.is-pinned{color:#3884ff;}',
-      'button.' + ROW_BTN_CLASS + ':hover{background:rgba(140,149,159,.12);}',
+      'button.' + ROW_BTN_CLASS + ':hover,button.' + ROW_BTN_CLASS + ':focus-visible{background:var(--dsw-alias-interactive-bg-hover,rgba(140,149,159,.12));}',
     ].join('')
 
     function injectStyles() {
@@ -257,14 +256,28 @@ window.__ModuleLoader__.load({
     }
 
     function titleFromRow(row) {
-      var nodes = row.querySelectorAll('span')
+      var titled = row.querySelector(':scope > [class*="title"]')
+      if (titled) return (titled.textContent || '').trim()
+      var nodes = row.querySelectorAll(':scope > span')
       for (var i = 0; i < nodes.length; i++) {
+        if (/slot|time|rowActions|visuallyHidden/i.test(nodes[i].className || '')) continue
         var text = (nodes[i].textContent || '').trim()
-        if (text && !nodes[i].querySelector('svg,button') && text.length < 200) {
-          if (nodes[i].children.length === 0) return text
-        }
+        if (text && nodes[i].children.length === 0 && text.length < 200) return text
       }
-      return (row.textContent || '').trim().split('\n')[0] || ''
+      return ''
+    }
+
+    function sessionRows(doc) {
+      return doc.querySelectorAll('[role="treeitem"][class*="sessionRow"]')
+    }
+
+    function placePinButton(row, btn) {
+      var actions = row.querySelector(':scope > [class*="rowActions"]')
+      if (actions) {
+        if (btn.parentNode !== actions || actions.firstChild !== btn) actions.insertBefore(btn, actions.firstChild)
+        return
+      }
+      if (btn.parentNode !== row) row.appendChild(btn)
     }
 
     function isOurSection(node) {
@@ -455,13 +468,13 @@ window.__ModuleLoader__.load({
         var byTitle = titlesToIds(list)
         var pinnedSet = {}
         for (var p = 0; p < pinned.length; p++) pinnedSet[pinned[p]] = true
-        var rows = doc.querySelectorAll('[role="treeitem"][aria-selected]')
+        var rows = sessionRows(doc)
         for (var i = 0; i < rows.length; i++) {
           var row = rows[i]
           if (!(row instanceof HTMLElement) || isOurSection(row)) continue
           var title = titleFromRow(row)
           var id = sessionIdForTitle(title, byTitle, list.current)
-          var btn = row.querySelector(':scope > button.' + ROW_BTN_CLASS)
+          var btn = row.querySelector('button.' + ROW_BTN_CLASS)
           if (!id) {
             if (btn) btn.remove()
             setHidden(row, false)
@@ -480,8 +493,8 @@ window.__ModuleLoader__.load({
               var result = store.set(sid, !store.isPinned(sid))
               if (result.limited) event.currentTarget.title = t(detectLang(ctx), 'limit')
             })
-            row.insertBefore(btn, row.firstChild)
           }
+          placePinButton(row, btn)
           btn.setAttribute('data-session-id', id)
           var isPinned = !!pinnedSet[id]
           btn.classList.toggle('is-pinned', isPinned)
@@ -494,7 +507,7 @@ window.__ModuleLoader__.load({
         var groups = doc.querySelectorAll('[' + TREE_ATTR + '] [class*="groupSection"], [' + TREE_ATTR + '] [class*="GroupSection"]')
         for (var g = 0; g < groups.length; g++) {
           var group = groups[g]
-          var sessions = group.querySelectorAll('[role="treeitem"][aria-selected]')
+          var sessions = group.querySelectorAll('[role="treeitem"][class*="sessionRow"]')
           if (sessions.length === 0) {
             setHidden(group, false)
             continue
