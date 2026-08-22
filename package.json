@@ -1,0 +1,53 @@
+{
+  "name": "dsh-codex-pins",
+  "version": "1.0.0",
+  "description": "Codex-style pinned sessions for DeepSeek Harness — always visible above the sidebar session list, no extra click.",
+  "keywords": [
+    "deepseek-harness",
+    "dsh",
+    "dsh-plugin",
+    "session-pin",
+    "codex",
+    "sidebar"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "main": "./host.js",
+  "exports": {
+    ".": "./host.js",
+    "./client": "./client.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "host.js",
+    "client.js",
+    "pin-store.mjs",
+    "cordis.patch.yml",
+    "README.md",
+    "README.zh.md",
+    "LICENSE"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/robbyisrobby/dsh-codex-pins.git"
+  },
+  "homepage": "https://github.com/robbyisrobby/dsh-codex-pins",
+  "bugs": {
+    "url": "https://github.com/robbyisrobby/dsh-codex-pins/issues"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true
+    }
+  }
+}

@@ -1,0 +1,4 @@
+# Codex-style pinned sessions: always visible above the sidebar session tree.
+- insert:
+    - id: dsh-codex-pins
+      name: dsh-codex-pins
