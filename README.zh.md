@@ -49,6 +49,10 @@ dsh plugin --profile desktop remove dsh-codex-pins
 dsh plugin --profile web remove dsh-codex-pins
 ```
 
+## 插件市场
+
+dsh-market 以及跟 [awesome-dsh-plugin](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin) 的商店，会在目录收录后出现这条。安装标识是 `github:robbyisrobby/dsh-codex-pins`。
+
 ## License
 
 MIT

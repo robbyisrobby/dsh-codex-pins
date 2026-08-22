@@ -49,6 +49,10 @@ dsh plugin --profile desktop remove dsh-codex-pins
 dsh plugin --profile web remove dsh-codex-pins
 ```
 
+## Plugin markets
+
+dsh-market and other storefronts that follow [awesome-dsh-plugin](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin) pick this repository up after it is listed there. The install spec is `github:robbyisrobby/dsh-codex-pins`.
+
 ## License
 
 MIT
