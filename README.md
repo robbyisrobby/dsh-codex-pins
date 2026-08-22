@@ -2,7 +2,7 @@
 
 English | [中文](README.zh.md)
 
-Codex-style **pinned sessions** for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness). Pinned chats sit **directly above the sidebar session list** and stay visible — no extra footer button, no extra click.
+Codex-style **pinned sessions** for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness). The sidebar splits into two panes — **Pinned** and **Recents** — each with its own heading and scroll. Pinned chats do not repeat in Recents.
 
 ```
 ┌─ sidebar ─────────────────────┐
@@ -11,9 +11,9 @@ Codex-style **pinned sessions** for [DeepSeek Harness](https://github.com/deepse
 │  Pinned                       │
 │    📌 Fix login flow      3h  │
 │    📌 Weekly review       2d  │
-│                               │
-│  workspace / recent sessions  │
-│    …                          │
+│  ───────────────────────────  │
+│  Recents                      │
+│    other sessions…            │
 └───────────────────────────────┘
 ```
 
@@ -28,11 +28,11 @@ Restart DeepSeek Harness (or DSH Desktop), then:
 
 1. Hover a session row and click the pin.
 2. Or open a session and click the pin in the conversation header.
-3. Pinned sessions appear in a **Pinned** block at the top of the list. Click a row to open it; click the pin again to unpin.
+3. The sidebar shows **Pinned** on top and **Recents** below. Click a pinned row to open it; click the pin again to move it back to Recents.
 
 ## Why this plugin
 
-Community pin plugins either reorder rows inside a workspace or hide the list behind a footer panel. Codex (and ChatGPT) put pins in a dedicated, always-on section above Recents. That is the whole product.
+Community pin plugins either reorder rows inside a workspace or hide the list behind a footer panel. Codex (and ChatGPT) keep Pinned and Recents as two separate panes. That is the whole product.
 
 ## Behaviour
 

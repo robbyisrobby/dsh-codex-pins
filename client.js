@@ -13,14 +13,17 @@ window.__ModuleLoader__.load({
     var MAX_PINS = 50
     var SESSION_ID_RE = /^session-[A-Za-z0-9-]{6,}$/
     var SECTION_ATTR = 'data-dsh-codex-pins'
+    var SPLIT_ATTR = 'data-dsh-codex-pins-split'
+    var TREE_ATTR = 'data-dsh-codex-pins-tree'
+    var HIDDEN_ATTR = 'data-dsh-codex-pins-hidden'
     var ROW_BTN_CLASS = 'dsh-codex-pins-row-btn'
     var PLUGIN_ID = 'dsh-codex-pins'
     var LOCALE_NS = 'dsh-codex-pins'
     var PIN_SVG = '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M16 9V4h1c.55 0 1-.45 1-1s-.45-1-1-1H7c-.55 0-1 .45-1 1s.45 1 1 1h1v5c0 1.66-1.34 3-3 3v2h5.97v7l1 1 1-1v-7H19v-2c-1.66 0-3-1.34-3-3z"/></svg>'
 
     var COPY = {
-      zh: { heading: '置顶', pin: '置顶会话', unpin: '取消置顶', empty: '没有已置顶的会话', limit: '置顶已满（最多 50 个）' },
-      en: { heading: 'Pinned', pin: 'Pin session', unpin: 'Unpin session', empty: 'No pinned sessions', limit: 'Pin limit reached (50)' },
+      zh: { heading: '置顶', recent: '最近', pin: '置顶会话', unpin: '取消置顶', empty: '没有已置顶的会话', limit: '置顶已满（最多 50 个）' },
+      en: { heading: 'Pinned', recent: 'Recents', pin: 'Pin session', unpin: 'Unpin session', empty: 'No pinned sessions', limit: 'Pin limit reached (50)' },
     }
 
     function normalizePins(value) {
@@ -186,9 +189,17 @@ window.__ModuleLoader__.load({
     }
 
     var STYLE_TEXT = [
-      '[' + SECTION_ATTR + ']{flex:none;padding:4px 0 8px;user-select:none;}',
-      '.dsh-codex-pins-heading{display:flex;align-items:center;gap:8px;height:28px;padding:0 8px;color:var(--dsw-alias-label-secondary,#8b949e);font-size:12px;font-weight:600;letter-spacing:.02em;}',
+      '[' + SPLIT_ATTR + ']{flex:1;min-height:0;display:flex;flex-direction:column;}',
+      '[' + SPLIT_ATTR + '] [' + TREE_ATTR + ']{flex:none!important;overflow:visible!important;min-height:0!important;height:auto!important;}',
+      '.dsh-codex-pins-pane{min-height:0;display:flex;flex-direction:column;}',
+      '.dsh-codex-pins-pane[data-pane="pinned"]{flex:0 1 auto;max-height:46%;}',
+      '.dsh-codex-pins-pane[data-pane="recent"]{flex:1 1 0;}',
+      '.dsh-codex-pins-pane-body{flex:1;min-height:0;overflow:auto;}',
+      '.dsh-codex-pins-divider{flex:none;height:1px;margin:4px 8px 2px;background:var(--dsw-alias-divider,rgba(140,149,159,.18));}',
+      '[' + SECTION_ATTR + ']{flex:none;user-select:none;}',
+      '.dsh-codex-pins-heading{display:flex;align-items:center;gap:8px;height:28px;padding:0 8px;color:var(--dsw-alias-label-secondary,#8b949e);font-size:12px;font-weight:600;letter-spacing:.02em;flex:none;}',
       '.dsh-codex-pins-heading svg{flex:none;opacity:.85;}',
+      '.dsh-codex-pins-empty{padding:6px 8px 10px;color:var(--dsw-alias-label-tertiary,#8b949e);font-size:12px;}',
       '.dsh-codex-pins-list{display:flex;flex-direction:column;gap:1px;}',
       '.dsh-codex-pins-row{all:unset;box-sizing:border-box;display:flex;align-items:center;gap:8px;width:100%;height:34px;padding:0 8px;border-radius:8px;color:var(--dsw-alias-label-primary,#e6edf3);cursor:pointer;font-size:13px;}',
       '.dsh-codex-pins-row:hover,.dsh-codex-pins-row:focus-visible{background:color-mix(in srgb, var(--dsw-alias-label-primary,#e6edf3) 8%, transparent);}',
@@ -260,47 +271,124 @@ window.__ModuleLoader__.load({
       return node && node.closest && node.closest('[' + SECTION_ATTR + ']')
     }
 
+    function setHidden(el, hide) {
+      if (hide) {
+        el.setAttribute(HIDDEN_ATTR, '1')
+        el.style.display = 'none'
+        return
+      }
+      if (el.getAttribute(HIDDEN_ATTR) === '1') {
+        el.removeAttribute(HIDDEN_ATTR)
+        el.style.display = ''
+      }
+    }
+
+    function headingEl(label, withIcon) {
+      var heading = document.createElement('div')
+      heading.className = 'dsh-codex-pins-heading'
+      if (withIcon) heading.innerHTML = PIN_SVG
+      var text = document.createElement('span')
+      text.textContent = label
+      heading.appendChild(text)
+      return heading
+    }
+
+    function ensureSplit(tree) {
+      var treeBody = tree.parentElement
+      if (!treeBody || !treeBody.parentElement) return null
+      var orphan = document.querySelector('[' + SPLIT_ATTR + ']')
+      if (orphan && !orphan.contains(treeBody)) {
+        var recentBody = orphan.querySelector('[data-pane="recent"] .dsh-codex-pins-pane-body')
+        var stale = orphan.querySelector('[' + TREE_ATTR + ']')
+        if (stale && stale !== treeBody) stale.remove()
+        if (recentBody) {
+          treeBody.setAttribute(TREE_ATTR, '')
+          recentBody.appendChild(treeBody)
+        } else {
+          unwrapSplit(document)
+        }
+      }
+      var existing = treeBody.closest('[' + SPLIT_ATTR + ']')
+      if (existing) {
+        return {
+          split: existing,
+          pinList: existing.querySelector('.dsh-codex-pins-list'),
+          pinEmpty: existing.querySelector('.dsh-codex-pins-empty'),
+          pinHeading: existing.querySelector('[data-pane="pinned"] .dsh-codex-pins-heading span'),
+          recentHeading: existing.querySelector('[data-pane="recent"] .dsh-codex-pins-heading span'),
+          treeBody: existing.querySelector('[' + TREE_ATTR + ']') || treeBody,
+        }
+      }
+      var root = treeBody.parentElement
+      var split = document.createElement('div')
+      split.setAttribute(SPLIT_ATTR, '')
+
+      var pinPane = document.createElement('div')
+      pinPane.className = 'dsh-codex-pins-pane'
+      pinPane.setAttribute('data-pane', 'pinned')
+      var pinHead = headingEl('', true)
+      var pinBody = document.createElement('div')
+      pinBody.className = 'dsh-codex-pins-pane-body'
+      var pinSection = document.createElement('div')
+      pinSection.setAttribute(SECTION_ATTR, '')
+      var pinList = document.createElement('div')
+      pinList.className = 'dsh-codex-pins-list'
+      pinList.setAttribute('role', 'list')
+      var pinEmpty = document.createElement('div')
+      pinEmpty.className = 'dsh-codex-pins-empty'
+      pinSection.appendChild(pinList)
+      pinSection.appendChild(pinEmpty)
+      pinBody.appendChild(pinSection)
+      pinPane.appendChild(pinHead)
+      pinPane.appendChild(pinBody)
+
+      var divider = document.createElement('div')
+      divider.className = 'dsh-codex-pins-divider'
+      divider.setAttribute('aria-hidden', 'true')
+
+      var recentPane = document.createElement('div')
+      recentPane.className = 'dsh-codex-pins-pane'
+      recentPane.setAttribute('data-pane', 'recent')
+      var recentHead = headingEl('')
+      var recentBody = document.createElement('div')
+      recentBody.className = 'dsh-codex-pins-pane-body'
+      treeBody.setAttribute(TREE_ATTR, '')
+      recentBody.appendChild(treeBody)
+      recentPane.appendChild(recentHead)
+      recentPane.appendChild(recentBody)
+
+      split.appendChild(pinPane)
+      split.appendChild(divider)
+      split.appendChild(recentPane)
+      root.appendChild(split)
+
+      return {
+        split: split,
+        pinList: pinList,
+        pinEmpty: pinEmpty,
+        pinHeading: pinHead.querySelector('span'),
+        recentHeading: recentHead.querySelector('span'),
+        treeBody: treeBody,
+      }
+    }
+
+    function unwrapSplit(doc) {
+      var split = doc.querySelector('[' + SPLIT_ATTR + ']')
+      if (!split) return
+      var treeBody = split.querySelector('[' + TREE_ATTR + ']')
+      if (treeBody && split.parentNode) {
+        treeBody.removeAttribute(TREE_ATTR)
+        split.parentNode.insertBefore(treeBody, split)
+      }
+      split.remove()
+    }
+
     function mountSidebar(ctx, store) {
       var doc = document
       var scheduled = false
       var lang = detectLang(ctx)
 
-      var render = function () {
-        scheduled = false
-        lang = detectLang(ctx)
-        var list = sessionList(ctx)
-        if (list.phase === 'ready') store.prune(list.ids)
-        var pinned = store.get()
-        var tree = findSessionTree(doc)
-        var existing = doc.querySelector('[' + SECTION_ATTR + ']')
-        if (!tree) return
-        if (pinned.length === 0) {
-          if (existing) existing.remove()
-          paintOfficialRows(list, [])
-          return
-        }
-        var section = existing
-        if (!section) {
-          section = doc.createElement('div')
-          section.setAttribute(SECTION_ATTR, '')
-          var heading = doc.createElement('div')
-          heading.className = 'dsh-codex-pins-heading'
-          heading.innerHTML = PIN_SVG
-          var headingLabel = doc.createElement('span')
-          heading.appendChild(headingLabel)
-          var listEl = doc.createElement('div')
-          listEl.className = 'dsh-codex-pins-list'
-          listEl.setAttribute('role', 'list')
-          section.appendChild(heading)
-          section.appendChild(listEl)
-        }
-        if (section.parentNode !== tree.parentNode || section.nextSibling !== tree) {
-          tree.parentNode.insertBefore(section, tree)
-        }
-        var headingText = section.querySelector('.dsh-codex-pins-heading span')
-        if (headingText) headingText.textContent = t(lang, 'heading')
-        var listRoot = section.querySelector('.dsh-codex-pins-list')
-        if (!listRoot) return
+      var renderPinRows = function (listRoot, pinned, list) {
         var seen = {}
         var rows = listRoot.querySelectorAll('.dsh-codex-pins-row')
         for (var r = 0; r < rows.length; r++) {
@@ -357,7 +445,6 @@ window.__ModuleLoader__.load({
           else row.removeAttribute('aria-current')
           if (listRoot.children[i] !== row) listRoot.insertBefore(row, listRoot.children[i] || null)
         }
-        paintOfficialRows(list, pinned)
       }
 
       var paintOfficialRows = function (list, pinned) {
@@ -373,6 +460,7 @@ window.__ModuleLoader__.load({
           var btn = row.querySelector(':scope > button.' + ROW_BTN_CLASS)
           if (!id) {
             if (btn) btn.remove()
+            setHidden(row, false)
             continue
           }
           if (!btn) {
@@ -397,7 +485,43 @@ window.__ModuleLoader__.load({
           var label = t(lang, isPinned ? 'unpin' : 'pin')
           btn.title = label
           btn.setAttribute('aria-label', label)
+          setHidden(row, isPinned)
         }
+        var groups = doc.querySelectorAll('[' + TREE_ATTR + '] [class*="groupSection"], [' + TREE_ATTR + '] [class*="GroupSection"]')
+        for (var g = 0; g < groups.length; g++) {
+          var group = groups[g]
+          var sessions = group.querySelectorAll('[role="treeitem"][aria-selected]')
+          if (sessions.length === 0) {
+            setHidden(group, false)
+            continue
+          }
+          var visible = 0
+          for (var s = 0; s < sessions.length; s++) {
+            if (sessions[s].getAttribute(HIDDEN_ATTR) !== '1') visible += 1
+          }
+          setHidden(group, visible === 0)
+        }
+      }
+
+      var render = function () {
+        scheduled = false
+        lang = detectLang(ctx)
+        var list = sessionList(ctx)
+        if (list.phase === 'ready') store.prune(list.ids)
+        var pinned = store.get()
+        var tree = findSessionTree(doc)
+        if (!tree) return
+        var layout = ensureSplit(tree)
+        if (!layout || !layout.pinList) return
+        if (layout.pinHeading) layout.pinHeading.textContent = t(lang, 'heading')
+        if (layout.recentHeading) layout.recentHeading.textContent = t(lang, 'recent')
+        if (layout.pinEmpty) {
+          layout.pinEmpty.textContent = t(lang, 'empty')
+          layout.pinEmpty.hidden = pinned.length > 0
+        }
+        layout.pinList.hidden = pinned.length === 0
+        renderPinRows(layout.pinList, pinned, list)
+        paintOfficialRows(list, pinned)
       }
 
       var schedule = function () {
@@ -417,8 +541,9 @@ window.__ModuleLoader__.load({
         unsubSessions()
         unsubStore()
         observer.disconnect()
-        var section = doc.querySelector('[' + SECTION_ATTR + ']')
-        if (section) section.remove()
+        var hidden = doc.querySelectorAll('[' + HIDDEN_ATTR + ']')
+        for (var h = 0; h < hidden.length; h++) setHidden(hidden[h], false)
+        unwrapSplit(doc)
         var buttons = doc.querySelectorAll('button.' + ROW_BTN_CLASS)
         for (var i = 0; i < buttons.length; i++) buttons[i].remove()
       }
