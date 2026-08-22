@@ -1,0 +1,24 @@
+name: Bug report
+description: Report something that is broken in dsh-codex-pins
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected, and what you saw instead.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Plugin version
+      placeholder: 1.1.1
+    validations:
+      required: true
+  - type: input
+    id: dsh
+    attributes:
+      label: DeepSeek Harness / DSH Desktop version
+    validations:
+      required: true
